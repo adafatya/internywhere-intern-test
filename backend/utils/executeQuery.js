@@ -1,6 +1,6 @@
 const db = require('./../config/database')
 
-function executeQuery(query, payload) {
+async function executeQuery(query, payload) {
     return new Promise((resolve, reject) => {
         db.query(query, payload, function (error, results, fields) {
             if (error) {
