@@ -1,17 +1,9 @@
-const db = require('./../config/database')
+const executeQuery = require('./../utils/executeQuery')
 
 exports.createTask = (payload) => {
     const query = `INSERT INTO tasks SET ?`
     
-    return new Promise((resolve, reject) => {
-        db.query(query, payload, function (error, results, fields) {
-            if (error) {
-                reject(error)
-            } else {
-                resolve(results.insertedId)
-            }
-        })
-    })
+    return executeQuery(query, payload)
 }
 
 exports.getTask = (payload) => {
@@ -22,15 +14,7 @@ exports.getTask = (payload) => {
     ORDER BY ? ?
     LIMIT ? OFFSET ?`
 
-    return new Promise((resolve, reject) => {
-        db.query(query, payload, function (error, results, fields) {
-            if (error) {
-                reject(error)
-            } else {
-                resolve(results)
-            }
-        })
-    })
+    return executeQuery(query, payload)
 }
 
 exports.getTaskDetail = (payload) => {
@@ -39,15 +23,7 @@ exports.getTaskDetail = (payload) => {
     FROM tasks
     WHERE task_id = ?`
 
-    return new Promise((resolve, reject) => {
-        db.query(query, payload, function (error, results, fields) {
-            if (error) {
-                reject(error)
-            } else {
-                resolve(results)
-            }
-        })
-    })
+    return executeQuery(query, payload)
 }
 
 exports.updateTask = (payload) => {
@@ -56,15 +32,7 @@ exports.updateTask = (payload) => {
     SET task_name = ?, task_description = ?, task_due_date = ?
     WHERE task_id = ?`
 
-    return new Promise((resolve, reject) => {
-        db.query(query, payload, function (error, results, fields) {
-            if (error) {
-                reject(error)
-            } else {
-                resolve(results.changedRows)
-            }
-        })
-    })
+    return executeQuery(query, payload)
 }
 
 exports.deleteTask = (payload) => {
@@ -73,13 +41,5 @@ exports.deleteTask = (payload) => {
     SET is_deleted = true
     WHERE task_id = ?`
 
-    return new Promise((resolve, reject) => {
-        db.query(query, payload, function (error, results, fields) {
-            if (error) {
-                reject(error)
-            } else {
-                resolve(results.changedRows)
-            }
-        })
-    })
+    return executeQuery(query, payload)
 }
