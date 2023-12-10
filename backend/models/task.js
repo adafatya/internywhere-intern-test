@@ -6,12 +6,12 @@ async function createTask (payload) {
     return await executeQuery(query, payload)
 }
 
-async function getTask (payload) {
+async function getTask (payload, order) {
     const query = `
     SELECT task_id, task_name, task_due_date
     FROM tasks
     WHERE is_deleted = false
-    ORDER BY ? ?
+    ORDER BY ? ${order === 'desc' ? 'DESC' : 'ASC'}
     LIMIT ? OFFSET ?`
 
     return await executeQuery(query, payload)

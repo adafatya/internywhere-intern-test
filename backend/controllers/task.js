@@ -20,14 +20,14 @@ async function createTaskController (req, res) {
 
 async function getTaskController (req, res) {
     const payload = [
-        req.body.sort_column,
-        req.body.sort_order,
-        req.body.limit,
-        (req.body.page-1)*5
+        req.query.sort_column,
+        parseInt(req.query.limit),
+        (parseInt(req.query.page)-1)*5
     ]
+    const order = req.query.sort_order
 
     try {
-        const result = await getTask(payload)
+        const result = await getTask(payload, order)
         res.status(200).json({data: result})
     } catch (error) {
         console.log(error)
@@ -36,7 +36,7 @@ async function getTaskController (req, res) {
 }
 
 async function getTaskDetailController (req, res) {
-    const payload = req.body.task_id
+    const payload = req.params.taskId
 
     try {
         const result = await getTaskDetail(payload)
@@ -52,7 +52,7 @@ async function updateTaskController (req, res) {
         req.body.task_name,
         req.body.task_description,
         req.body.task_due_date,
-        req.body.task_id
+        req.params.taskId
     ]
 
     try {
@@ -65,7 +65,7 @@ async function updateTaskController (req, res) {
 }
 
 async function deleteTaskController (req, res) {
-    const payload = req.body.task_id
+    const payload = req.params.taskId
 
     try {
         const result = await deleteTask(payload)
