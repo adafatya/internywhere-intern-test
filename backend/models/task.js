@@ -12,7 +12,9 @@ async function getTask (payload, order) {
     FROM tasks
     WHERE is_deleted = false
     ORDER BY ? ${order === 'desc' ? 'DESC' : 'ASC'}
-    LIMIT ? OFFSET ?`
+    LIMIT ? OFFSET ?;
+    SELECT CEIL(COUNT(task_id)/?) AS total_page
+    FROM tasks`
 
     return await executeQuery(query, payload)
 }

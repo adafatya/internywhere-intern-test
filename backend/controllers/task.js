@@ -22,13 +22,14 @@ async function getTaskController (req, res) {
     const payload = [
         req.query.sort_column,
         parseInt(req.query.limit),
-        (parseInt(req.query.page)-1)*5
+        (parseInt(req.query.page)-1)*5,
+        parseInt(req.query.limit)
     ]
     const order = req.query.sort_order
 
     try {
         const result = await getTask(payload, order)
-        res.status(200).json({data: result})
+        res.status(200).json({data: result[0], total_page: result[1][0].total_page})
     } catch (error) {
         console.log(error)
         res.status(500).json({error: "Something's wrong on our side"})
