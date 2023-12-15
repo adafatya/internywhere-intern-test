@@ -11,7 +11,7 @@ async function getTask (payload, order) {
     SELECT task_id, task_name, task_due_date
     FROM tasks
     WHERE is_deleted = false
-    ORDER BY ? ${order === 'desc' ? 'DESC' : 'ASC'}
+    ORDER BY ?? ${order === 'desc' ? 'DESC' : 'ASC'}
     LIMIT ? OFFSET ?;
     SELECT CEIL(COUNT(task_id)/?) AS total_page
     FROM tasks`
