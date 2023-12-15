@@ -9,9 +9,11 @@
   "author": "Muhammad Aufaditya Adinata",
   "license": "ISC",
   "dependencies": {
+    "bulma": "^0.9.4",
     "parcel": "^2.10.3",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-icons": "^4.12.0"
   },
   "devDependencies": {
     "process": "^0.11.10"
