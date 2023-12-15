@@ -1,18 +1,22 @@
 const { useEffect, useState } = require("react")
-import { FaSortUp, FaSortDown } from "react-icons/fa6"
-import { TaskTableItem } from "./TaskTableItem"
+
 import 'bulma/css/bulma.min.css'
+import { FaSortUp, FaSortDown } from "react-icons/fa6"
+
+import { TaskTableItem } from "./TaskTableItem"
 import { Pagination } from "./Pagination"
+import { Modal } from './Modal'
+import { CreateTaskForm } from './CreateTaskForm'
 
 function TaskTable () {
-    let [query, setQuery] = useState({
+    const [query, setQuery] = useState({
         sortColumn: 'task_name',
         sortOrder: 'asc',
         limit: 5,
         page: 1
     })
-    let [tasks, setTasks] = useState([])
-    let [totalPage, setTotalPage] = useState(1)
+    const [tasks, setTasks] = useState([])
+    const [totalPage, setTotalPage] = useState(1)
 
     function changeQuery (newQuery) {
         setQuery({...query, ...newQuery})
@@ -30,21 +34,29 @@ function TaskTable () {
         }
     }
 
-    function onPageChange (page) {
-        changeQuery({page: page})
-    }
-
-    function onLimitChange (limit) {
-        changeQuery({page: 1, limit: limit})
+    const [openModal, setOpenModal] = useState(false)
+    const [task, setTask] = useState({
+        task_name: '',
+        task_description: '',
+        task_due_date: ''
+    })
+    function createNewTask (task) {
+        let url = 'http://localhost:3001/api/task'
+        fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(task)
+        })
     }
 
     useEffect(() => {
-        url = 'http://localhost:3001/api/task'
+        let url = 'http://localhost:3001/api/task'
         url += `?sort_column=${query.sortColumn}`
         url += `&sort_order=${query.sortOrder}`
         url += `&limit=${query.limit}`
         url += `&page=${query.page}`
-        console.log(url)
         fetch(url)
         .then((response) => response.json())
         .then((data) => {
@@ -56,6 +68,14 @@ function TaskTable () {
 
     return (
         <div className="ml-3">
+            <button className="button is-success" onClick={() => setOpenModal(true)}>Create new task</button>
+            <Modal
+                title='Create new task'
+                content={<CreateTaskForm task={task} setTask={setTask} />}
+                onConfirm={() => createNewTask(task)}
+                onClose={() => setOpenModal(false)}
+                isActive={openModal}
+            />
             <table className="table is-bordered is-fullwidth">
                 <thead>
                     <tr>
@@ -86,10 +106,10 @@ function TaskTable () {
             <Pagination
                 currentPage={query.page}
                 totalPages={totalPage}
-                onPageChange={onPageChange}
+                onPageChange={(page) => changeQuery({page: page})}
                 selectedLimit={query.limit}
                 limitOptions={[5, 10, 25]}
-                onLimitChange={onLimitChange}
+                onLimitChange={(limit) => changeQuery({limit: limit})}
             />
         </div>
     )
