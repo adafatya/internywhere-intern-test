@@ -26,7 +26,7 @@ function CreateTaskForm ({task, setTask}) {
                 </div>
             </div>
             <div className="field">
-                <label htmlFor="" className="label">Task Due Date</label>
+                <label className="label">Task Due Date</label>
                 <div className="control">
                     <input
                     type="date"

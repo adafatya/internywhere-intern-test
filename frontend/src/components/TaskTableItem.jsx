@@ -2,7 +2,7 @@ import { FaEye, FaPen, FaTrash } from "react-icons/fa6"
 
 function TaskTableItem ({ no, name, due_date, id }) {
     function formatDate(date) {
-        return `${date.getDate()}-${date.getMonth()}-${date.getFullYear()}`
+        return date.toDateString()
     }
 
     return (
