@@ -17,6 +17,11 @@ function TaskTable () {
     })
     const [tasks, setTasks] = useState([])
     const [totalPage, setTotalPage] = useState(1)
+    const [notification, setNotification] = useState({
+        isOpen: false,
+        title: '',
+        message: ''
+    })
 
     function changeQuery (newQuery) {
         setQuery({...query, ...newQuery})
@@ -34,7 +39,7 @@ function TaskTable () {
         }
     }
 
-    const [openModal, setOpenModal] = useState(false)
+    const [openFormModal, setOpenFormModal] = useState(false)
     const [task, setTask] = useState({
         task_name: '',
         task_description: '',
@@ -49,6 +54,35 @@ function TaskTable () {
             },
             body: JSON.stringify(task)
         })
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error(response.statusText)
+            } else
+                return response.json()
+        })
+        .then(() => {
+            setOpenFormModal(false)
+            setTask({
+                task_name: '',
+                task_description: '',
+                task_due_date: ''
+            })
+            setNotification({
+                isOpen: true,
+                title: 'Berhasil menambahkan data',
+                message: 'Data berhasil ditambahkan'
+            })
+        })
+        .catch((error) => {
+            let message = 'Silahkan coba beberapa saat lagi'
+            if (error.message === 'Bad Request')
+                message = 'Terdapat masalah pada input anda'
+            setNotification({
+                isOpen: true,
+                title: error.message,
+                message: message
+            })
+        })
     }
 
     useEffect(() => {
@@ -58,23 +92,38 @@ function TaskTable () {
         url += `&limit=${query.limit}`
         url += `&page=${query.page}`
         fetch(url)
-        .then((response) => response.json())
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error(response.statusText)
+            } else
+                return response.json()
+        })
         .then((data) => {
             setTasks(data.data)
             setTotalPage(data.total_page)
+        })
+        .catch((error) => {
+            let message = 'Silahkan coba beberapa saat lagi'
+            if (error.message === 'Bad Request')
+                message = 'Terdapat masalah pada input anda'
+            setNotification({
+                isOpen: true,
+                title: error.message,
+                message: message
+            })
         })
 
     }, [query.sortColumn, query.sortOrder, query.limit, query.page])
 
     return (
         <div className="ml-3">
-            <button className="button is-success" onClick={() => setOpenModal(true)}>Create new task</button>
+            <button className="button is-success" onClick={() => setOpenFormModal(true)}>Create new task</button>
             <Modal
                 title='Create new task'
                 content={<CreateTaskForm task={task} setTask={setTask} />}
                 onConfirm={() => createNewTask(task)}
-                onClose={() => setOpenModal(false)}
-                isActive={openModal}
+                onClose={() => setOpenFormModal(false)}
+                isActive={openFormModal}
             />
             <table className="table is-bordered is-fullwidth">
                 <thead>
@@ -93,11 +142,11 @@ function TaskTable () {
                     {
                         tasks.map((task, index) => (
                             <TaskTableItem
-                                key={task.task_id}
+                                key={task?.task_id}
                                 no={(query.page-1)*query.limit+index+1}
-                                name={task.task_name}
-                                due_date={task.task_due_date}
-                                id={task.task_id}
+                                name={task?.task_name}
+                                due_date={task?.task_due_date}
+                                id={task?.task_id}
                             />
                         ))
                     }
@@ -109,7 +158,14 @@ function TaskTable () {
                 onPageChange={(page) => changeQuery({page: page})}
                 selectedLimit={query.limit}
                 limitOptions={[5, 10, 25]}
-                onLimitChange={(limit) => changeQuery({limit: limit})}
+                onLimitChange={(limit) => changeQuery({page: 1, limit: limit})}
+            />
+            <Modal
+                title={notification.title}
+                content={<p>{notification.message}</p>}
+                onConfirm={() => setNotification({...notification, isOpen: false})}
+                onClose={() => setNotification({...notification, isOpen: false})}
+                isActive={notification.isOpen}
             />
         </div>
     )
