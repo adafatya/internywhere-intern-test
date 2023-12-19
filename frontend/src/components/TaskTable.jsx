@@ -1,12 +1,12 @@
-const { useEffect, useState } = require("react")
+import { useEffect, useState } from "react"
 
-import 'bulma/css/bulma.min.css'
 import { FaSortUp, FaSortDown } from "react-icons/fa6"
 
 import { TaskTableItem } from "./TaskTableItem"
 import { Pagination } from "./Pagination"
 import { Modal } from './Modal'
 import { CreateTaskForm } from './CreateTaskForm'
+import { handleError } from "../utils/handleError"
 
 function TaskTable () {
     const [query, setQuery] = useState({
@@ -17,10 +17,10 @@ function TaskTable () {
     })
     const [tasks, setTasks] = useState([])
     const [totalPage, setTotalPage] = useState(1)
-    const [notification, setNotification] = useState({
-        isOpen: false,
+    const [notif, setNotif] = useState({
         title: '',
-        message: ''
+        message: '',
+        isActive: false
     })
 
     function changeQuery (newQuery) {
@@ -39,51 +39,7 @@ function TaskTable () {
         }
     }
 
-    const [openFormModal, setOpenFormModal] = useState(false)
-    const [task, setTask] = useState({
-        task_name: '',
-        task_description: '',
-        task_due_date: ''
-    })
-    function createNewTask (task) {
-        let url = 'http://localhost:3001/api/task'
-        fetch(url, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(task)
-        })
-        .then((response) => {
-            if (!response.ok) {
-                throw new Error(response.statusText)
-            } else
-                return response.json()
-        })
-        .then(() => {
-            setOpenFormModal(false)
-            setTask({
-                task_name: '',
-                task_description: '',
-                task_due_date: ''
-            })
-            setNotification({
-                isOpen: true,
-                title: 'Berhasil menambahkan data',
-                message: 'Data berhasil ditambahkan'
-            })
-        })
-        .catch((error) => {
-            let message = 'Silahkan coba beberapa saat lagi'
-            if (error.message === 'Bad Request')
-                message = 'Terdapat masalah pada input anda'
-            setNotification({
-                isOpen: true,
-                title: error.message,
-                message: message
-            })
-        })
-    }
+    const [isCreate, setIsCreate] = useState(false)
 
     useEffect(() => {
         let url = 'http://localhost:3001/api/task'
@@ -95,36 +51,37 @@ function TaskTable () {
         .then((response) => {
             if (!response.ok) {
                 throw new Error(response.statusText)
-            } else
+            } else {
                 return response.json()
+            }
         })
         .then((data) => {
             setTasks(data.data)
             setTotalPage(data.total_page)
         })
         .catch((error) => {
-            let message = 'Silahkan coba beberapa saat lagi'
-            if (error.message === 'Bad Request')
-                message = 'Terdapat masalah pada input anda'
-            setNotification({
-                isOpen: true,
-                title: error.message,
-                message: message
-            })
+            handleError(setNotif, error)
         })
 
     }, [query.sortColumn, query.sortOrder, query.limit, query.page])
 
     return (
         <div className="ml-3">
-            <button className="button is-success" onClick={() => setOpenFormModal(true)}>Create new task</button>
             <Modal
-                title='Create new task'
-                content={<CreateTaskForm task={task} setTask={setTask} />}
-                onConfirm={() => createNewTask(task)}
-                onClose={() => setOpenFormModal(false)}
-                isActive={openFormModal}
+                title={notif.title}
+                content={<p>{notif.message}</p>}
+                isActive={notif.isActive}
+                onConfirm={() => setNotif({...notif, isActive: false})}
+                onClose={() => setNotif({...notif, isActive: false})}
             />
+            <button className="button is-success" onClick={() => setIsCreate(true)}>Create new task</button>
+            {isCreate &&
+                <CreateTaskForm
+                    isActive={isCreate}
+                    onClose={() => setIsCreate(false)}
+                    setNotif={setNotif}
+                />
+            }
             <table className="table is-bordered is-fullwidth">
                 <thead>
                     <tr>
@@ -147,6 +104,7 @@ function TaskTable () {
                                 name={task?.task_name}
                                 due_date={task?.task_due_date}
                                 id={task?.task_id}
+                                setNotif={setNotif}
                             />
                         ))
                     }
@@ -159,13 +117,6 @@ function TaskTable () {
                 selectedLimit={query.limit}
                 limitOptions={[5, 10, 25]}
                 onLimitChange={(limit) => changeQuery({page: 1, limit: limit})}
-            />
-            <Modal
-                title={notification.title}
-                content={<p>{notification.message}</p>}
-                onConfirm={() => setNotification({...notification, isOpen: false})}
-                onClose={() => setNotification({...notification, isOpen: false})}
-                isActive={notification.isOpen}
             />
         </div>
     )

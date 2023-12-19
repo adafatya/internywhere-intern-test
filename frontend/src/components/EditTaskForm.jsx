@@ -1,9 +1,9 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import { handleError } from "../utils/handleError"
 import { sendNotif } from "../utils/sendNotif"
 
-function CreateTaskForm ({isActive, onClose, setNotif}) {
+function EditTaskForm ({id, isActive, onClose, setNotif}) {
     const [task, setTask] = useState({
         task_name: '',
         task_description: '',
@@ -13,10 +13,10 @@ function CreateTaskForm ({isActive, onClose, setNotif}) {
         setTask({...task, ...newValue})
     }
 
-    function createNewTask () {
-        const url = 'http://localhost:3001/api/task'
+    function updateTask () {
+        const url = 'http://localhost:3001/api/task/'+id
         fetch(url, {
-            method: "POST",
+            method: "PUT",
             headers: {
                 "Content-Type": "application/json"
             },
@@ -26,13 +26,8 @@ function CreateTaskForm ({isActive, onClose, setNotif}) {
             if (!response.ok) {
                 throw new Error(response.statusText)
             } else {
-                setTask({
-                    task_name: '',
-                    task_description: '',
-                    task_due_date: ''
-                })
-                sendNotif(setNotif, 'Berhasil menambahkan task', 'Task berhasil ditambah')
                 onClose()
+                sendNotif(setNotif, 'Berhasil memperbarui task', 'Task berhasil diperbarui')
             }
         })
         .catch((error) => {
@@ -40,12 +35,30 @@ function CreateTaskForm ({isActive, onClose, setNotif}) {
         })
     }
 
+    useEffect(() => {
+        const url = 'http://localhost:3001/api/task/'+id
+        fetch(url)
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error(response.statusText)
+            } else {
+                return response.json()
+            }
+        })
+        .then((data) => {
+            let task_due_date = new Date(data.data[0].task_due_date)
+            task_due_date = task_due_date.toISOString().substring(0, 10)
+            setTask({...data.data[0], task_due_date: task_due_date})
+        })
+        .catch((error) => handleError(setNotif, error))
+    }, [id])
+
     return (
         <div className={`modal ${(isActive? 'is-active':'')}`}>
         <div className="modal-background"></div>
         <div className="modal-card">
             <header className="modal-card-head">
-                <p className="modal-card-title"> Create new task </p>
+                <p className="modal-card-title"> Edit task </p>
                 <button className="delete" aria-label="close" onClick={onClose}></button>
             </header>
             <section className="modal-card-body">
@@ -83,7 +96,7 @@ function CreateTaskForm ({isActive, onClose, setNotif}) {
                 </div>
             </section>
             <footer className="modal-card-foot">
-                <button className="button is-success" onClick={() => createNewTask()}> Add </button>
+                <button className="button is-success" onClick={() => updateTask()}> Save </button>
                 <button className="button is-danger" onClick={onClose}> Cancel </button>
             </footer>
         </div>
@@ -91,4 +104,4 @@ function CreateTaskForm ({isActive, onClose, setNotif}) {
     )
 }
 
-module.exports = {CreateTaskForm}
+module.exports = {EditTaskForm}
