@@ -23,7 +23,7 @@ async function getTaskDetail (payload) {
     const query = `
     SELECT task_name, task_description, task_due_date
     FROM tasks
-    WHERE task_id = ?`
+    WHERE task_id = ? AND is_deleted = false`
 
     return await executeQuery(query, payload)
 }
@@ -32,7 +32,7 @@ async function updateTask (payload) {
     const query = `
     UPDATE tasks
     SET task_name = ?, task_description = ?, task_due_date = ?
-    WHERE task_id = ?`
+    WHERE task_id = ? AND is_deleted = false`
 
     return await executeQuery(query, payload)
 }
@@ -41,7 +41,7 @@ async function deleteTask (payload) {
     const query = `
     UPDATE tasks
     SET is_deleted = true
-    WHERE task_id = ?`
+    WHERE task_id = ? AND is_deleted = false`
 
     return await executeQuery(query, payload)
 }

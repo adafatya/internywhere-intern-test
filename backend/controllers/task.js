@@ -7,73 +7,99 @@ const {
 } = require('./../models/task')
 
 async function createTaskController (req, res) {
-    const payload = req.body
-
-    try {
-        const result = await createTask(payload)
-        res.status(201).json({data: {task_id: result.insertId}})
-    } catch (error) {
-        console.log(error)
-        res.status(500).json({error: "Something's wrong on our side"})
+    if (!req.body.task_name || !req.body.task_description || !req.body.task_due_date) {
+        res.status(400).json({error: 'Some parameter is missing'})
+    } else {
+        const payload = req.body
+        try {
+            const result = await createTask(payload)
+            res.status(201).json({data: {task_id: result.insertId}})
+        } catch (error) {
+            console.log(error)
+            res.status(500).json({error: "Something's wrong on our side"})
+        }
     }
 }
 
 async function getTaskController (req, res) {
-    const payload = [
-        req.query.sort_column,
-        parseInt(req.query.limit),
-        (parseInt(req.query.page)-1)*5,
-        parseInt(req.query.limit)
-    ]
-    const order = req.query.sort_order
-
-    try {
-        const result = await getTask(payload, order)
-        res.status(200).json({data: result[0], total_page: result[1][0].total_page})
-    } catch (error) {
-        console.log(error)
-        res.status(500).json({error: "Something's wrong on our side"})
+    const limit = parseInt(req.query.limit)
+    const offset = (parseInt(req.query.page)-1)*limit
+    
+    if (Number.isNaN(limit) || Number.isNaN(offset)) {
+        res.status(400).json({error: 'Limit or page is not integer'})
+    } else if (!req.query.limit || !req.query.page || !req.query.order || !req.query.sort_column) {
+        res.status(400).json({error: 'Some parameter is missing'})
+    } else {
+        const payload = [
+            req.query.sort_column,
+            limit,
+            offset,
+            limit
+        ]
+        const order = req.query.sort_order
+    
+        try {
+            const result = await getTask(payload, order)
+            res.status(200).json({data: result[0], total_page: result[1][0].total_page})
+        } catch (error) {
+            console.log(error)
+            res.status(500).json({error: "Something's wrong on our side"})
+        }
     }
 }
 
 async function getTaskDetailController (req, res) {
-    const payload = req.params.taskId
+    const payload = parseInt(req.params.taskId)
 
-    try {
-        const result = await getTaskDetail(payload)
-        res.status(200).json({data: result})
-    } catch (error) {
-        console.log(error)
-        res.status(500).json({error: "Something's wrong on our side"})
+    if (Number.isNaN(payload)) {
+        res.status(400).json({error: 'task id must be integer'})
+    } else {
+        try {
+            const result = await getTaskDetail(payload)
+            res.status(200).json({data: result})
+        } catch (error) {
+            console.log(error)
+            res.status(500).json({error: "Something's wrong on our side"})
+        }
     }
 }
 
 async function updateTaskController (req, res) {
-    const payload = [
-        req.body.task_name,
-        req.body.task_description,
-        req.body.task_due_date,
-        req.params.taskId
-    ]
+    if (!req.body.task_name || !req.body.task_description || !req.body.task_due_date || !req.params.taskId) {
+        res.status(400).json({error: 'Some parameter is missing'})
+    } else if (Number.isNaN(parseInt(req.params.taskId))) {
+        res.status(400).json({error: 'task id must be integer'})
+    } else {
+        const payload = [
+            req.body.task_name,
+            req.body.task_description,
+            req.body.task_due_date,
+            req.params.taskId
+        ]
 
-    try {
-        const result = await updateTask(payload)
-        res.status(200).json({data: {affected_row: result.affectedRows}})
-    } catch (error) {
-        console.log(error)
-        res.status(500).json({error: "Something's wrong on our side"})
+        try {
+            const result = await updateTask(payload)
+            res.status(200).json({data: {affected_row: result.affectedRows}})
+        } catch (error) {
+            console.log(error)
+            res.status(500).json({error: "Something's wrong on our side"})
+        }
     }
 }
 
 async function deleteTaskController (req, res) {
-    const payload = req.params.taskId
+    const payload = parseInt(req.params.taskId)
 
-    try {
-        const result = await deleteTask(payload)
-        res.status(200).json({data: {affected_row: result.affectedRows}})
-    } catch (error) {
-        console.log(error)
-        res.status(500).json({error: "Something's wrong on our side"})
+    if (Number.isNaN(payload)) {
+        res.status(400).json({error: 'task id must be integer'})
+    } else {
+        try {
+            const result = await getTaskDetail(payload)
+            res.status(200).json({data: result})
+        } catch (error) {
+            console.log(error)
+            res.status(500).json({error: "Something's wrong on our side"})
+        }
     }
 }
 
