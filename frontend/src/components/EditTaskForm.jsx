@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 
 import { handleError } from "../utils/handleError"
 import { sendNotif } from "../utils/sendNotif"
+import { isNameValid, isDescriptionValid, isDueDateValid } from "../utils/validation"
 
 function EditTaskForm ({id, isActive, onClose, setNotif}) {
     const [task, setTask] = useState({
@@ -33,6 +34,10 @@ function EditTaskForm ({id, isActive, onClose, setNotif}) {
         .catch((error) => {
             handleError(setNotif, error)
         })
+    }
+
+    function isValid () {
+        return isNameValid(task.task_name) && isDescriptionValid(task.task_description) && isDueDateValid(task.task_due_date)
     }
 
     useEffect(() => {
@@ -72,6 +77,9 @@ function EditTaskForm ({id, isActive, onClose, setNotif}) {
                                 value={task.task_name}
                                 onChange={(e) => changeValue({task_name: e.target.value})} />
                         </div>
+                        {!isNameValid(task.task_name) &&
+                            <p className="help is-danger">Task name is invalid</p>
+                        }
                     </div>
                     <div className="field">
                         <label className="label">Task Description</label>
@@ -82,6 +90,9 @@ function EditTaskForm ({id, isActive, onClose, setNotif}) {
                                 onChange={(e) => changeValue({task_description: e.target.value})}>
                             </textarea>
                         </div>
+                        {!isDescriptionValid(task.task_description) &&
+                            <p className="help is-danger">Task description is invalid</p>
+                        }
                     </div>
                     <div className="field">
                         <label className="label">Task Due Date</label>
@@ -92,11 +103,14 @@ function EditTaskForm ({id, isActive, onClose, setNotif}) {
                             value={task.task_due_date}
                             onChange={(e) => changeValue({task_due_date: e.target.value})} />
                         </div>
+                        {!isDueDateValid(task.task_due_date) &&
+                            <p className="help is-danger">Task due date is invalid</p>
+                        }
                     </div>
                 </div>
             </section>
             <footer className="modal-card-foot">
-                <button className="button is-success" onClick={() => updateTask()}> Save </button>
+                <button className="button is-success" onClick={() => updateTask()} disabled={!isValid()}> Save </button>
                 <button className="button is-danger" onClick={onClose}> Cancel </button>
             </footer>
         </div>
