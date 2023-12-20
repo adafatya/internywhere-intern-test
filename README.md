@@ -20,17 +20,19 @@ dalam windows dapat menggunakan command powershell
 cp ./.env.example ./.env
 ```
 
-- pindah ke sub folder backend lalu jalankan npm start
+- pindah ke sub folder backend lalu install module dan jalankan npm start
 
 ```
 cd ./backend
+npm install
 npm start
 ```
 
-- buat terminal baru, pindah ke sub folder frontend lalu jalankan npm start
+- buat terminal baru, pindah ke sub folder frontend lalu install module jalankan npm start
 
 ```
 cd ./frontend
+npm install
 npm start
 ```
 
