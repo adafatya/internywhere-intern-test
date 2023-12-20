@@ -27,7 +27,7 @@ async function getTaskController (req, res) {
     
     if (Number.isNaN(limit) || Number.isNaN(offset)) {
         res.status(400).json({error: 'Limit or page is not integer'})
-    } else if (!req.query.limit || !req.query.page || !req.query.order || !req.query.sort_column) {
+    } else if (!req.query.limit || !req.query.page || !req.query.sort_order || !req.query.sort_column) {
         res.status(400).json({error: 'Some parameter is missing'})
     } else {
         const payload = [
